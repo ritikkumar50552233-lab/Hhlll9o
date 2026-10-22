@@ -1,0 +1,6 @@
+{
+  "name": "Worldveil Intelligence",
+  "description": "Global OSINT, Geospatial Intelligence, Public Data Monitoring, Global Events, and Intelligence Analysis by Ayush Yadav",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
