@@ -113,7 +113,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
               {events.slice(0, 6).map((ev) => (
                 <div
                   key={ev.id}
-                  className="p-3.5 bg-slate-950 border border-slate-800/80 rounded-xl hover:border-slate-700 transition-all flex items-start justify-between gap-4"
+                  onClick={() => setActiveTab('map')}
+                  className="p-3.5 bg-slate-950 border border-slate-800/80 rounded-xl hover:border-cyan-500/40 transition-all flex items-start justify-between gap-4 cursor-pointer group"
                 >
                   <div>
                     <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-1">
@@ -123,7 +124,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ setActiveT
                       <span>·</span>
                       <span className="text-slate-300">{ev.sourceName}</span>
                     </div>
-                    <h3 className="text-xs font-bold text-white">{ev.title}</h3>
+                    <h3 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{ev.title}</h3>
                     <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{ev.description}</p>
                   </div>
                   <span

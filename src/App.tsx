@@ -28,6 +28,14 @@ function MainAppContent() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [aiQuery, setAiQuery] = useState<string>('');
+  const [showQuotaBanner, setShowQuotaBanner] = useState(false);
+
+  React.useEffect(() => {
+    const handleQuota = () => setShowQuotaBanner(true);
+    window.addEventListener('gmp-quota-exceeded', handleQuota);
+    return () => window.removeEventListener('gmp-quota-exceeded', handleQuota);
+  }, []);
 
   const handleOpenAuth = (mode: 'signin' | 'signup') => {
     setAuthMode(mode);
@@ -39,8 +47,30 @@ function MainAppContent() {
     setActiveTab('overview');
   };
 
+  const handleOpenAIWithQuery = (q: string) => {
+    setAiQuery(q);
+    setActiveTab('ai');
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
+      {/* Google Maps Quota Warning Banner */}
+      {showQuotaBanner && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
+          <span>
+            Google Maps Platform quota reached. If you are the app owner, visit{' '}
+            <a
+              href="https://developers.google.com/maps/ai/ai-studio?utm_campaign=gmp_mcp_codeassist_v1_aistudio#quota_exceeded_errors"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline font-semibold text-amber-950 hover:text-amber-800"
+            >
+              maps developer site
+            </a>{' '}
+            for instructions to update your account.
+          </span>
+        </div>
+      )}
       <Navbar
         onOpenAuth={handleOpenAuth}
         activeTab={activeTab}
@@ -75,7 +105,7 @@ function MainAppContent() {
           ) : (
             <>
               {activeTab === 'overview' && <DashboardOverview setActiveTab={setActiveTab} />}
-              {activeTab === 'map' && <GlobalMapPage />}
+              {activeTab === 'map' && <GlobalMapPage onOpenAIAnalysis={handleOpenAIWithQuery} />}
               {activeTab === 'events' && <GlobalEventsPage />}
               {activeTab === 'osint' && <GeospatialOSINTPage />}
               {activeTab === 'earth' && <EarthObservationPage />}
@@ -86,7 +116,7 @@ function MainAppContent() {
               {activeTab === 'news' && <NewsIntelPage />}
               {activeTab === 'investigations' && <InvestigationWorkspacePage />}
               {activeTab === 'situation' && <SituationRoomPage />}
-              {activeTab === 'ai' && <AIAnalysisPage />}
+              {activeTab === 'ai' && <AIAnalysisPage initialQuery={aiQuery} />}
               {activeTab === 'sources' && <DataSourcesPage />}
               {activeTab === 'admin' && <AdminConsolePage />}
               {activeTab === 'settings' && <SettingsProfilePage />}

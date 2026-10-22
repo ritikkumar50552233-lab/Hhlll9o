@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Compass, Search, MapPin, Bookmark, Download, ExternalLink, Globe } from 'lucide-react';
+import { searchLocationGeocode } from '../services/api';
 
 export const GeospatialOSINTPage: React.FC = () => {
   const [query, setQuery] = useState('Tokyo, Japan');
@@ -17,14 +18,31 @@ export const GeospatialOSINTPage: React.FC = () => {
     { name: 'Suez Canal Terminal', lat: 30.5852, lng: 32.2654 }
   ]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.toLowerCase().includes('tokyo')) {
-      setResult({ name: 'Tokyo Metropolitan Region, Japan', lat: 35.6762, lon: 139.6503, boundingbox: ['35.5', '35.8', '139.3', '140.0'], osmType: 'relation', importance: 0.92 });
-    } else if (query.toLowerCase().includes('london')) {
-      setResult({ name: 'Greater London, United Kingdom', lat: 51.5074, lon: -0.1278, boundingbox: ['51.3', '51.6', '-0.5', '0.2'], osmType: 'relation', importance: 0.95 });
-    } else {
-      setResult({ name: query, lat: 20.0 + Math.random() * 20, lon: 10.0 + Math.random() * 50, boundingbox: ['19', '21', '9', '11'], osmType: 'node', importance: 0.85 });
+    if (!query.trim()) return;
+    setLoading(true);
+    try {
+      const results = await searchLocationGeocode(query);
+      if (results.length > 0) {
+        const top = results[0];
+        setResult({
+          name: top.display_name,
+          lat: top.lat,
+          lon: top.lon,
+          boundingbox: [String(top.lat - 0.1), String(top.lat + 0.1), String(top.lon - 0.1), String(top.lon + 0.1)],
+          osmType: 'verified_node',
+          importance: 0.95
+        });
+      } else {
+        alert('Location not found. Please try another query.');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 

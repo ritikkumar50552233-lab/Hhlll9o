@@ -264,6 +264,41 @@ export async function requestAIAnalysis(prompt: string, contextData: any): Promi
     return data.analysis;
   } catch (err: any) {
     console.error('AI Analysis API error:', err);
-    return `[AI Intelligence Fallback Assessment]: Unable to reach secure server Gemini API endpoint (${err.message}). Grounding check confirms ${contextData?.events?.length || 0} active telemetry signals retrieved from regional monitoring feeds.`;
+    return `[AI Intelligence Fallback Assessment]: ${err.message}`;
   }
 }
+
+export interface GeocodeResult {
+  place_id: string | number;
+  lat: number;
+  lon: number;
+  display_name: string;
+}
+
+export async function searchLocationGeocode(query: string): Promise<GeocodeResult[]> {
+  try {
+    const res = await fetch(`/api/geocoding?q=${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      // Direct client fallback to Nominatim if backend route has issue
+      const direct = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      const data = await direct.json();
+      return data.map((item: any) => ({
+        place_id: item.place_id,
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon),
+        display_name: item.display_name
+      }));
+    }
+    const data = await res.json();
+    return data.map((item: any) => ({
+      place_id: item.place_id,
+      lat: parseFloat(item.lat),
+      lon: parseFloat(item.lon),
+      display_name: item.display_name
+    }));
+  } catch (err) {
+    console.error('Geocoding error:', err);
+    return [];
+  }
+}
+
